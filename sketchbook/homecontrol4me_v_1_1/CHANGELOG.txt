@@ -1,0 +1,2 @@
+v1.1
+- Sende- und Empfangsqualität verbessert, es wird gewartet - bis die Fernbedienung aufhört zu senden.
