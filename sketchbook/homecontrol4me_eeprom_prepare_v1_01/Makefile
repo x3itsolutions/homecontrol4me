@@ -1,9 +1,10 @@
 
 #
-# Arduino 0022 Makefile 
+# Arduino 0023 Makefile
 # Uno with DOGS102 Shield
 #
 # written by olikraus@gmail.com
+# modified by xkonni
 #
 # Features:
 #   - boards.txt is used to derive parameters
@@ -35,10 +36,10 @@
 #	diecimila		Arduino Diecimila, Duemilanove, or Nano w/ ATmega168
 #	mega		Arduino Mega
 #	mini			Arduino Mini
-#	lilypad328	LilyPad Arduino w/ ATmega328  
-BOARD:=uno
+#	lilypad328	LilyPad Arduino w/ ATmega328
+BOARD:=atmega328
 
-# additional (comma separated) defines 
+# additional (comma separated) defines
 # -DDOGM128_HW		board is connected to DOGM128 display
 # -DDOGM132_HW		board is connected to DOGM132 display
 # -DDOGS102_HW		board is connected to DOGS102 display
@@ -51,20 +52,28 @@ DEFS=-DDOGS102_HW -DDOG_DOUBLE_MEMORY -DDOG_SPI_SW_ARDUINO
 AVR_TOOLS_PATH:=/usr/bin/
 
 # Install path of the arduino software. Requires a '/' at the end.
-ARDUINO_PATH:=/home/kraus/prg/arduino-0022/
+ARDUINO_PATH:=/extra/arduino/arduino-0023/
 
 # Install path for avrdude. Requires a '/' at the end. Can be empty if avrdude is in the search path.
-AVRDUDE_PATH:= 
+AVRDUDE_PATH:=
 
 # The unix device where we can reach the arduino board
 # Uno: /dev/ttyACM0
 # Duemilanove: /dev/ttyUSB0
-AVRDUDE_PORT:=/dev/ttyACM0
+AVRDUDE_PORT:=/dev/ttyUSB0
 
 # List of all libaries which should be included.
-EXTRA_DIRS=$(ARDUINO_PATH)libraries/LiquidCrystal/
-#EXTRA_DIRS+=$(ARDUINO_PATH)libraries/Dogm/
-EXTRA_DIRS+=/home/kraus/src/arduino/dogm128/hg/libraries/Dogm/
+EXTRA_DIRS=$(ARDUINO_PATH)libraries/SPI/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/EEPROM/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/Ethernet/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/Ethernet/utility/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/EthernetDHCP/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/EthernetDHCP/utility/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/Streaming/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/pgmspace/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/webduino/
+EXTRA_DIRS+=$(ARDUINO_PATH)libraries/RCSwitch/
+#EXTRA_DIRS+=/home/kraus/src/arduino/dogm128/hg/libraries/Dogm/
 
 #=== fetch parameter from boards.txt processor parameter ===
 # the basic idea is to get most of the information from boards.txt
@@ -95,7 +104,7 @@ CSRC:=$(shell ls $(CDIRS) 2>/dev/null)
 CCSRC:=$(shell ls *.cc 2>/dev/null)
 
 CPPDIRS:=$(EXTRA_DIRS) $(addsuffix utility/,$(EXTRA_DIRS))
-CPPDIRS:=*.cpp utility/*.cpp $(addsuffix *.cpp,$(CPPDIRS)) $(ARDUINO_PATH)hardware/arduino/cores/arduino/*.cpp 
+CPPDIRS:=*.cpp utility/*.cpp $(addsuffix *.cpp,$(CPPDIRS)) $(ARDUINO_PATH)hardware/arduino/cores/arduino/*.cpp
 CPPSRC:=$(shell ls $(CPPDIRS) 2>/dev/null)
 
 #=== build internal variables ===
@@ -131,10 +140,10 @@ ELFNAME:=$(TMPDIRPATH)$(TARGETNAME).elf
 HEXNAME:=$(TMPDIRPATH)$(TARGETNAME).hex
 
 AVRDUDE_FLAGS = -V -F
-AVRDUDE_FLAGS += -C $(ARDUINO_PATH)/hardware/tools/avrdude.conf 
+AVRDUDE_FLAGS += -C $(ARDUINO_PATH)/hardware/tools/avrdude.conf
 AVRDUDE_FLAGS += -p $(MCU)
 AVRDUDE_FLAGS += -P $(AVRDUDE_PORT)
-AVRDUDE_FLAGS += -c $(AVRDUDE_PROGRAMMER) 
+AVRDUDE_FLAGS += -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += -b $(AVRDUDE_UPLOAD_RATE)
 AVRDUDE_FLAGS += -U flash:w:$(HEXNAME)
 
@@ -148,15 +157,17 @@ COMMON_FLAGS = -DF_CPU=$(F_CPU) -mmcu=$(MCU) $(DEFS)
 # COMMON_FLAGS += -gdwarf-2
 COMMON_FLAGS += -Os
 COMMON_FLAGS += -Wall -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-COMMON_FLAGS += -I. 
+COMMON_FLAGS += -I.
 COMMON_FLAGS += -I$(ARDUINO_PATH)hardware/arduino/cores/arduino
 COMMON_FLAGS += $(addprefix -I,$(EXTRA_DIRS))
 COMMON_FLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections
 COMMON_FLAGS += -Wl,--relax
 COMMON_FLAGS += -mcall-prologues
+## VERSION ARDUINO
+COMMON_FLAGS += -DARDUINO=23
 
-CFLAGS = $(COMMON_FLAGS) -std=gnu99 -Wstrict-prototypes  
-CXXFLAGS = $(COMMON_FLAGS) 
+CFLAGS = $(COMMON_FLAGS) -std=gnu99 -Wstrict-prototypes
+CXXFLAGS = $(COMMON_FLAGS)
 
 # Replace standard build tools by avr tools
 CC = $(AVRTOOLSPATH)avr-gcc
@@ -165,7 +176,7 @@ AR  = @$(AVRTOOLSPATH)avr-ar
 
 
 # "rm" must be able to delete a directory tree
-RM = rm -rf 
+RM = rm -rf
 
 #=== rules ===
 
@@ -177,7 +188,7 @@ $(TMPDIRPATH)%.o: %.c
 	@$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(TMPDIRPATH)%.o: %.cc
-	@echo compile $< 
+	@echo compile $<
 	@$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(TMPDIRPATH)%.o: %.cpp
@@ -200,7 +211,7 @@ $(TMPDIRPATH)%.dis: $(TMPDIRPATH)%.o
 
 .elf.hex:
 	@$(OBJCOPY) -O ihex -R .eeprom $< $@
-	
+
 $(TMPDIRPATH)%.cpp: %.pde
 	@cat $(ARDUINO_PATH)hardware/arduino/cores/arduino/main.cpp > $@
 	@cat $< >> $@
@@ -212,7 +223,7 @@ $(TMPDIRPATH)%.cpp: %.pde
 all: tmpdir $(HEXNAME) assemblersource showsize
 	ls -al $(HEXNAME) $(ELFNAME)
 
-$(ELFNAME): $(LIBNAME)($(addprefix $(TMPDIRPATH),$(OBJFILES))) 
+$(ELFNAME): $(LIBNAME)($(addprefix $(TMPDIRPATH),$(OBJFILES)))
 	$(LINK.o) $(COMMON_FLAGS) $(LIBNAME) $(LOADLIBES) $(LDLIBS) -o $@
 
 $(LIBNAME)(): $(addprefix $(TMPDIRPATH),$(OBJFILES))
@@ -239,7 +250,7 @@ showsize: $(ELFNAME)
 clean:
 	$(RM) $(TMPDIRPATH)
 
-# Program the device.  
+# Program the device.
 # step 1: reset the arduino board with the stty command
 # step 2: user avrdude to upload the software
 .PHONY: upload
