@@ -118,6 +118,40 @@ boolean switchOutletOff[4];
 void output(unsigned long decimal, unsigned int length, unsigned int delay, unsigned int* raw) {
   switchMillis = millis();
   if (decimal != 0) {
+    Serial.print("decimal: ");
+    Serial.println(decimal);
+
+    // Configuration for remote "00001"
+    if (decimal == 5571921 && powerOutlet[eeprom.data.number[0]] == false){
+      switchOutletOn[0] = true;
+    }
+    if (decimal == 5571924 && powerOutlet[eeprom.data.number[0]] == true){
+      switchOutletOff[0] = true;
+    }
+
+    if (decimal == 5574993 && powerOutlet[eeprom.data.number[1]] == false){
+      switchOutletOn[1] = true;
+    }
+    if (decimal == 5574996 && powerOutlet[eeprom.data.number[1]] == true){
+      switchOutletOff[1] = true;
+    }
+
+    if (decimal == 5575761 && powerOutlet[eeprom.data.number[2]] == false){
+      switchOutletOn[2] = true;
+    }
+    if (decimal == 5575764 && powerOutlet[eeprom.data.number[2]] == true){
+      switchOutletOff[2] = true;
+    }
+
+    if (decimal == 5575953 && powerOutlet[eeprom.data.number[3]] == false){
+      switchOutletOn[3] = true;
+    }
+    if (decimal == 5575956 && powerOutlet[eeprom.data.number[3]] == true){
+      switchOutletOff[3] = true;
+    }
+
+    // Configuration for remote "00000"
+    /*
     if (decimal == 5588305 && powerOutlet[eeprom.data.number[0]] == false){
       switchOutletOn[0] = true;
     }
@@ -145,6 +179,7 @@ void output(unsigned long decimal, unsigned int length, unsigned int delay, unsi
     if (decimal == 5592415 && powerOutlet[eeprom.data.number[3]] == true){
       switchOutletOff[3] = true;
     }
+    */
   }
 }
 
@@ -192,6 +227,8 @@ void setup() {
 
     // Admin web init
     web_setup();
+
+    Serial.begin(9600);
 }
 int i = 0;
 
