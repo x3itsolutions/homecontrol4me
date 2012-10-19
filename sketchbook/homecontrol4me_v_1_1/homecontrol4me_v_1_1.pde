@@ -383,7 +383,7 @@ void defaultCmd(WebServer &server, WebServer::ConnectionType type, char *url_tai
     char buf[4];
 
 
-    server.print("<meta http-equiv=\"refresh\" content=\"5; URL=index.html\">");
+    //server.print("<meta http-equiv=\"refresh\" content=\"5; URL=index.html\">");
     server.printP(htmlHead2);
 
     P(htmlT00a) =
