@@ -118,8 +118,6 @@ boolean switchOutletOff[4];
 void output(unsigned long decimal, unsigned int length, unsigned int delay, unsigned int* raw) {
   switchMillis = millis();
   if (decimal != 0) {
-    Serial.print("decimal: ");
-    Serial.println(decimal);
 
     // Configuration for remote "00001"
     if (decimal == 5571921 && powerOutlet[eeprom.data.number[0]] == false){
@@ -228,7 +226,6 @@ void setup() {
     // Admin web init
     web_setup();
 
-    Serial.begin(9600);
 }
 int i = 0;
 
