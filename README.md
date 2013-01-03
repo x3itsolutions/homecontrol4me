@@ -4,10 +4,7 @@ homecontrol4me
 Die Steuerung für Haus und Garten
 
 Inhalt:
-* Arduino v23
+* Arduino 0023 libraries
 * homecontrol prepare eeprom v1.01
-* homecontrol v1.1
-* Makefiles um ohne arduino gui auszukommen
-  make && make upload
+* homecontrol v1.102
 
-Patched fuer gcc-avr 4.72 aus Archlinux
